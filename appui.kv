@@ -1,0 +1,75 @@
+#:import utils kivy.utils
+
+Screen:
+    Background:
+        canvas.before:
+            Color:
+                rgba: utils.get_color_from_hex(self.ColorTheme)
+            Rectangle:
+                pos: self.pos
+                size: self.size
+        ClockWidget:
+            id: mainWidget
+        Label:
+            id: ses
+            font_size: '25sp'
+            text: mainWidget.Text
+            pos_hint: {"center_x": .5, "center_y": .4}
+        Label:
+            font_size: '20sp'
+            text: mainWidget.Quote
+            pos_hint: {"center_x": .5}
+            y: ses.y - 30
+
+<ClockWidget>:
+    size_hint: [.3, .4]
+    pos_hint: {'center_x': .5, 'center_y': .65}
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(self.ColorTheme)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<skipBTN>:
+    opacity: 0 if self.hidden else 1
+    disabled: True if self.hidden else False
+    icon: 'skip-next'
+    theme_text_color: "Custom"
+    text_color: utils.get_color_from_hex("#F6D4D2")
+
+<ClockTextWidget>:
+    font_size: '100sp'
+    size_hint: [.5, .5]
+    pos_hint: {'center_x': .5, 'center_y': .65}
+
+<CustomLabel>:
+    text: self.Text
+    color: utils.get_color_from_hex("#00000")
+    font_size: '30sp'
+    size_hint: (None, None)
+    pos_hint: {'center_x': .5, 'center_y': .5}
+
+<startBTN>:
+    size_hint: [.4, .25]
+    pos_hint: {'center_x': .5, 'center_y': .2}
+
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex("#EBEBEB")
+        RoundedRectangle:
+            pos: self.pos[0], self.pos[1]
+            size: self.size[0], self.size[1] - self.buttonPad
+            radius: 5, 5, 5, 5
+
+        Color:
+            rgba: utils.get_color_from_hex("#FFFFFF")
+        RoundedRectangle:
+            id: mainBTN
+            pos: self.pos[0], self.pos[1] + self.buttonPadRemote
+            size: self.size[0], self.size[1] - self.buttonPad
+            radius: 5, 5, 5, 5
+    FloatLayout:
+        id: buttonText
+        pos: root.pos[0], root.pos[1] + root.buttonPadRemote
+        size: root.size[0], root.size[1] - root.buttonPad
