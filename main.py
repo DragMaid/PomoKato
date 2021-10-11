@@ -13,18 +13,19 @@ from kivy.uix.label import Label
 from kivy.clock import Clock
 from functools import partial
 from kivy.core.audio import SoundLoader
-from kivymd.uix.button import MDIconButton
+from kivymd.uix.button import MDIconButton, MDFlatButton, MDRaisedButton
 from kivymd.uix.label import MDIcon
+from kivy.core.window import Window
+from kivymd.uix.dialog import MDDialog
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 KIVY_PATH = os.path.join(DIRECTORY, "appui.kv")
 SOUND_PATH = os.path.join(DIRECTORY, "assets/sounds")
 CONGIG_PATH = "/home/kato/.config/safeeyes/safeeyes.json"
 QUOTE = [{"name": "Go do 8 pullups!"}]
-STUDY = [0, 2]
+STUDY = [60, 0]
 BREAK = [10, 0]
 LONG_BREAK = [15, 0]
-print(DIRECTORY)
 
 
 class Background(FloatLayout):
@@ -38,6 +39,8 @@ class Background(FloatLayout):
         else:
             self.ColorTheme = self.STUDY_COLOR
 
+class CustomDialog(MDDialog):
+    pass
 
 class skipBTN(ButtonBehavior, MDIcon):
     hidden = BooleanProperty(True)
@@ -48,9 +51,24 @@ class skipBTN(ButtonBehavior, MDIcon):
         self.btn = btn
         btn.bind(pos=self.update)
 
+        self.dialog = CustomDialog(
+            text="[color=#FCFCFC]Are you sure you want to finish the round early? (The remaining time will not be counted in the report.)[/color]",
+            buttons=[
+                MDRaisedButton(text="CANCEL", on_release=self.closeDialog, text_color=get_color_from_hex("#FCFCFC"), md_bg_color=get_color_from_hex("#242424")),
+                MDRaisedButton(text="OK", on_release=self.skip_session, text_color=get_color_from_hex("#FCFCFC")),
+            ],
+        )
+
     def update(self, *args):
         self.y = self.btn.y + (self.btn.size[1] / 2) - (self.size[1] / 2)
         self.x = self.btn.x + self.btn.size[0] + 20
+    
+    def closeDialog(self, *args):
+        self.dialog.dismiss()
+
+    def skip_session(self, *args):
+        self.closeDialog()
+        self.parent.skip_session()
 
     def hideWidget(self):
         if self.hidden == False:
@@ -59,8 +77,7 @@ class skipBTN(ButtonBehavior, MDIcon):
             self.hidden = False
 
     def on_release(self):
-        self.parent.skip_session()
-
+        self.dialog.open()
 
 class ClockWidget(FloatLayout):
     Text = StringProperty("#1")
@@ -115,6 +132,8 @@ class ClockTextWidget(Label):
     deltaSec = STUDY[1]
     cycles = 0
     isSTUDY = True
+    alarm = SoundLoader.load(os.path.join(SOUND_PATH, "alarm2.mp3"))
+
 
     def __init__(self, **kwargs):
         super(). __init__()
@@ -122,8 +141,7 @@ class ClockTextWidget(Label):
 
     def startClock(self):
         start_time = time.time()
-        self.event = Clock.schedule_interval(
-            partial(self.updateClock, start_time), 1)
+        self.event = Clock.schedule_interval(partial(self.updateClock, start_time), 1)
 
     def stopClock(self):
         self.event.cancel()
@@ -132,15 +150,15 @@ class ClockTextWidget(Label):
         if self.seconds == 0:
             if self.minutes != 0:
                 self.minutes -= 1
-                self.deltaSec = 59
+                self.seconds = 60
 
             else:
                 self.stopClock()
                 self.restartClock()
                 self.parent.toggleBTN()
-                return None  # Just to exit the function
+                return None
 
-        self.seconds = int(self.deltaSec - (time.time() - time_start))
+        self.seconds = int(self.seconds - 1)
         self.text = '%02d:%02d' % (self.minutes, self.seconds)
 
     def changeBreak(self):
@@ -166,7 +184,7 @@ class ClockTextWidget(Label):
 
     def restartClock(self):
         if self.isSTUDY:
-            if self.cycles % 4 == 0 and self.cycles != 0:
+            if (self.cycles+1) % 4  == 0:
                 self.changeLongBreak()
                 self.startBreak()
                 self.parent.updateCycle(self.cycles+1, Break=True)
@@ -182,21 +200,30 @@ class ClockTextWidget(Label):
             self.parent.updateCycle(self.cycles+1, Break=False)
 
     def startBreak(self):
-        sound = SoundLoader.load(os.path.join(SOUND_PATH, "alarm2.mp3"))
-        sound.play()
+        self.alarm.unload()
+        self.alarm = SoundLoader.load(os.path.join(SOUND_PATH, "alarm2.mp3"))
+        self.alarm.seek(0)
+        self.alarm.play()
         with open(CONGIG_PATH, 'r+') as file:
             data = json.load(file)
             data['long_break_duration'] = self.minutes * 60 + self.seconds
-            data['long_break_interval'] = 1
+            data['long_break_interval'] = 999999
             data['long_breaks'] = QUOTE
             file.seek(0)
             json.dump(data, file, indent=4)
             file.truncate()
         app = App.get_running_app()
         app.setupThread(self.showBreak)
+        self.breakTimeout()
+
+    def breakTimeout(self):
+        Clock.schedule_once(self.killDaemon, (self.minutes * 60 + self.seconds)+10)
+
+    def killDaemon(self, *args):
+        os.system("killall safeeyes")
 
     def showBreak(self):
-        os.system("killall safeeyes")
+        self.killDaemon()
         os.system("safeeyes -t")
 
 
@@ -219,12 +246,19 @@ class startBTN(ButtonBehavior, FloatLayout):
     buttonPressed = False
     buttonPadRemote = NumericProperty(buttonPad)
     buttonText = StringProperty("START")
-
+    btnsound = SoundLoader.load(os.path.join(SOUND_PATH, "button.mp3"))
     def __init__(self, clock):
         super(). __init__()
         self.clock = clock
         self.label = CustomLabel()
         self.ids.buttonText.add_widget(self.label)
+        Window.bind(on_touch_up=self.checkOutpos)
+
+    def checkOutpos(self, *args):
+        if not self.buttonPressed:
+            pos_x, pos_y =(Window.mouse_pos)
+            if not (pos_x >= self.pos[0] and pos_x <= self.pos[0] + self.size[0] and pos_y >= self.pos[1] and pos_y <= self.pos[1] + self.size[1]):
+                self.buttonPadRemote = self.buttonPad
 
     def on_press(self):
         self.buttonPadRemote = 0
@@ -242,14 +276,18 @@ class startBTN(ButtonBehavior, FloatLayout):
             self.parent.hideWidget()
 
     def on_release(self):
+        # pos_x, pos_y =(Window.mouse_pos)
+        # if pos_x >= self.pos[0] and pos_x <= self.pos[0] + self.size[0] and pos_y >= self.pos[1] and pos_y <= self.pos[1] + self.size[1]:
         if not self.buttonPressed:
             self.changeState(reversed=True)
             self.clock.startClock()
         else:
             self.changeState()
             self.clock.stopClock()
-        btnsound = SoundLoader.load(os.path.join(SOUND_PATH, "button.mp3"))
-        btnsound.play()
+        self.btnsound.unload()
+        self.btnsound = SoundLoader.load(os.path.join(SOUND_PATH, "button.mp3"))
+        self.btnsound.seek(0)
+        self.btnsound.play()
 
 
 class MainApp(MDApp):
