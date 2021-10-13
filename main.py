@@ -8,6 +8,7 @@ from kivy.lang import Builder
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import ButtonBehavior
+from kivymd.uix.behaviors import HoverBehavior
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty, BooleanProperty
 from kivy.utils import get_color_from_hex
 from kivy.uix.label import Label
@@ -126,7 +127,7 @@ class Logo(FloatLayout):
         self.add_widget(self.logo)
 
 
-class settingBTN(ButtonBehavior, FloatLayout):
+class settingBTN(ButtonBehavior, HoverBehavior, FloatLayout):
     buttonPad = 5
     newTime = [DATA.get("study")["time"], DATA.get("break")["time"], DATA.get("long_break")["time"]]
     ColorTheme = StringProperty(STUDY_THEME)
@@ -152,7 +153,13 @@ class settingBTN(ButtonBehavior, FloatLayout):
         )
         self.dialog.bind(on_open=self.toggleDialog)
         self.dialog.bind(on_dismiss=self.toggleDialog)
-        
+
+    def on_enter(self):
+        Window.set_system_cursor("hand")
+
+    def on_leave(self):
+        Window.set_system_cursor("arrow")
+
     def changeTheme(self, isStudy=True):
         if isStudy:
             self.ColorTheme = STUDY_THEME
@@ -212,7 +219,7 @@ class settingBTN(ButtonBehavior, FloatLayout):
             self.writeChangedTime()
             self.dialog.dismiss()
 
-class reportBTN(ButtonBehavior, FloatLayout):
+class reportBTN(ButtonBehavior, HoverBehavior, FloatLayout):
     buttonPad = 5
     ColorTheme = StringProperty(STUDY_THEME)
     def __init__ (self, **kwargs):
@@ -226,6 +233,12 @@ class reportBTN(ButtonBehavior, FloatLayout):
         )
         self.dialog.bind(on_open=self.toggleDialog)
         self.dialog.bind(on_dismiss=self.toggleDialog)
+
+    def on_enter(self):
+        Window.set_system_cursor("hand")
+
+    def on_leave(self):
+        Window.set_system_cursor("arrow")
 
     def toggleDialog(self, *args):
         self.parent.toggleDialog()
@@ -251,7 +264,7 @@ class reportBTN(ButtonBehavior, FloatLayout):
             self.pos[1] += self.buttonPad
         Window.unbind(on_touch_up=self.checkOutpos)
 
-class skipBTN(ButtonBehavior, MDIcon):
+class skipBTN(ButtonBehavior, HoverBehavior ,MDIcon):
     hidden = BooleanProperty(True)
 
     def __init__(self, btn, **kwargs):
@@ -269,6 +282,12 @@ class skipBTN(ButtonBehavior, MDIcon):
         self.dialog.bind(on_open=self.toggleDialog)
         self.dialog.bind(on_dismiss=self.toggleDialog)
         
+    def on_enter(self):
+        Window.set_system_cursor("hand")
+
+    def on_leave(self):
+        Window.set_system_cursor("arrow")
+
     def toggleDialog(self, *args):
         self.parent.toggleDialog()
 
@@ -388,7 +407,8 @@ class ClockTextWidget(Label):
             if self.minutes != 0:
                 self.minutes -= 1
                 self.seconds = 60
-                self.updateTotalMins()
+                if self.isSTUDY:
+                    self.updateTotalMins()
             else:
                 self.stopClock()
                 self.restartClock()
@@ -496,7 +516,7 @@ class CustomLabel(Label):
             self.Text = "[b]START[/b]"
 
 
-class startBTN(ButtonBehavior, FloatLayout):
+class startBTN(ButtonBehavior, HoverBehavior, FloatLayout):
     buttonPad = 10
     buttonPressed = False
     buttonPadRemote = NumericProperty(buttonPad)
@@ -526,6 +546,12 @@ class startBTN(ButtonBehavior, FloatLayout):
             if not (pos_x >= self.pos[0] and pos_x <= self.pos[0] + self.size[0] and pos_y >= self.pos[1] and pos_y <= self.pos[1] + self.size[1]):
                 self.buttonPadRemote = self.buttonPad
         Window.unbind(on_touch_up=self.checkOutpos)
+
+    def on_enter(self):
+        Window.set_system_cursor("hand")
+
+    def on_leave(self):
+        Window.set_system_cursor("arrow")
 
     def on_press(self):
         Window.bind(on_touch_up=self.checkOutpos)

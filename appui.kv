@@ -184,7 +184,8 @@ Screen:
 
 <skipBTN>:
     opacity: 0 if self.hidden else 1
-    size_hint: [.13,.1]
+    size_hint: [None,.1]
+    width: 45
     disabled: True if self.hidden else False
     icon: 'skip-next'
     theme_text_color: "Custom"
