@@ -9,11 +9,11 @@
 Inspired by [pomofocus](https://pomofocus.io/), the app was made in the python programming language with kivy framework to replicate most of the experience you can have with an offline Pomodoro timer.  The code is written by an amateur and therefore may be a bit hard to look at or even comprehend what is going on. But despite all the downsides, I am sure it should be enough to satisfy most of your basic needs and will hopefully improve your study sessions. 
 
 # Features
-- ## Study -  Break - Long break
+- ### Study -  Break - Long break
 ![FAILED TO LOAD IMAGE](https://i.imgur.com/kzwJyE7.png)
-- ## Keep track of your progress and can be reviewed within the report tab
+- ### Keep track of your progress and can be reviewed within the report tab
 ![FAILED TO LOAD IMAGE](https://i.imgur.com/G0jjk46.png)
-- ## Highly modifiable
+- ### Highly modifiable
   > Since the code was written in python, you can easily change or modify any component of the app to meet your need ( I use [safeeyes](https://github.com/slgobinath/SafeEyes) to keep myself away from the screen and get a good stretch before the next study session)
   > Or you can add in your thread and execute any program you would like to run at the end of each session
 # :warning: Warning :warning:
