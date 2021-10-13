@@ -55,13 +55,13 @@ class Background(FloatLayout):
             self.isStudy = True
 
     def restartClock(self, custom=False, *args):
-        self.children[4].restartClock(custom)
+        self.children[-1].restartClock(custom)
 
     def changeClock(self, Study, Break, LongBreak):
-        self.children[4].changeClock(Study, Break, LongBreak)
+        self.children[-1].changeClock(Study, Break, LongBreak)
 
     def toggleDialog(self, *args):
-        self.children[4].toggleDialog()
+        self.children[-1].toggleDialog()
 
     def changeTheme(self, reversed=False):
         if reversed:
@@ -76,26 +76,28 @@ class customIcon(ILeftBody, MDIcon):
     pass
 
 class Container(BoxLayout):
-    totalTime = str(DATA.get("total_time")["value"])
-    days =  str(DATA.get("days")["value"])
-    streak = str(DATA.get("streak")["value"])
-    data = [totalTime, days, streak]
     widgets = []
     def __init__ (self, **kwargs):
         super(). __init__ ()
         self.widgets = [
-            customGraphContainer(icon="clock-outline", text=self.totalTime, followup="hours focused"),
-            customGraphContainer(icon="calendar-today", text=self.days, followup="days accessed"),
-            customGraphContainer(icon="fire", text=self.streak, followup="current streak")
+            customGraphContainer(icon="clock-outline", text="default", followup="hours focused"),
+            customGraphContainer(icon="calendar-today", text="default", followup="days accessed"),
+            customGraphContainer(icon="fire", text="default", followup="current streak")
         ]
+        self.bl = BoxLayout(orientation="horizontal", spacing="20dp", size_hint_y=None, height="100dp")
+        self.add_widget(self.bl)
         for x in self.widgets: 
-            self.add_widget(x)
+            self.bl.add_widget(x)
+
+    def convert(self):
+        return str(self.totalTime / 60)[0]
 
     def updateData(self):
         self.days =  str(DATA.get("days")["value"])
         self.streak = str(DATA.get("streak")["value"])
-        self.totalTime = str(DATA.get("total_time")["value"])
-        self.data = [self.totalTime, self.days, self.streak]
+        self.totalTime = int(DATA.get("total_time")["value"])
+        hours = self.convert()
+        self.data = [hours, self.days, self.streak]
         for x in range(len(self.widgets)):
             self.widgets[x].updateData(self.data[x])
 
@@ -116,6 +118,13 @@ class settingContent(BoxLayout):
     studyTime = str(DATA.get("study")["time"])
     breakTime = str(DATA.get("break")["time"])
     longbreakTime = str(DATA.get("long_break")["time"])
+
+class Logo(FloatLayout):
+    def __init__ (self, **kwargs):
+        super(). __init__ ()
+        self.logo = customIcon(icon="check-circle")
+        self.add_widget(self.logo)
+
 
 class settingBTN(ButtonBehavior, FloatLayout):
     buttonPad = 5
@@ -254,7 +263,7 @@ class skipBTN(ButtonBehavior, MDIcon):
             text="[color=#FCFCFC]Are you sure you want to finish the round early? (The remaining time will not be counted in the report.)[/color]",
             buttons=[
                 MDRaisedButton(text="CANCEL", on_release=self.closeDialog, text_color=get_color_from_hex("#FCFCFC"), md_bg_color=get_color_from_hex("#242424")),
-                MDRaisedButton(text="OK", on_release=self.skip_session, text_color=get_color_from_hex("#FCFCFC")),
+                MDRaisedButton(text="OK", on_release=self.skip_session, text_color=get_color_from_hex("#242424")),
             ],
         )
         self.dialog.bind(on_open=self.toggleDialog)
@@ -474,17 +483,17 @@ class ClockTextWidget(Label):
 
 
 class CustomLabel(Label):
-    Text = StringProperty("START")
+    Text = StringProperty("[b]START[/b]")
 
     def __init__(self, **kwargs):
         super(). __init__()
         # self.pos = self.parent.pos
 
     def changeText(self, *args):
-        if self.Text == "START":
-            self.Text = "STOP"
+        if self.Text == "[b]START[/b]":
+            self.Text = "[b]STOP[/b]"
         else:
-            self.Text = "START"
+            self.Text = "[b]START[/b]"
 
 
 class startBTN(ButtonBehavior, FloatLayout):
