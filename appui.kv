@@ -8,8 +8,10 @@ Screen:
             Rectangle:
                 pos: self.pos
                 size: self.size
+
         ClockWidget:
             id: mainWidget
+
         Label:
             id: ses
             font_size: '25sp'
@@ -21,9 +23,16 @@ Screen:
             pos_hint: {"center_x": .5}
             y: ses.y - 30
 
+        settingBTN:
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 20, mainWidget.pos[1] + mainWidget.size[1] + 50
+        reportBTN:
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 20 - self.size[0] - 15, mainWidget.pos[1] + mainWidget.size[1] + 50
+
 <ClockWidget>:
-    size_hint: [.3, .4]
+    size_hint: None, None
+    size: 570, 400
     pos_hint: {'center_x': .5, 'center_y': .65}
+
     canvas.before:
         Color:
             rgba: utils.get_color_from_hex(self.ColorTheme)
@@ -34,6 +43,134 @@ Screen:
 <CustomDialog>:
     md_bg_color: utils.get_color_from_hex("#3D3D3D")
 
+<customGraphContainer>:
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex("#F8E8E7")
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: 5,5,5,5
+
+    MDIcon:
+        icon: root.icon
+        size_hint: None, None
+        pos_hint: {"x":0, "center_y":.7}
+        font_size: "40sp"
+        padding_x: 20
+
+    Label: 
+        id: val
+        text: root.text
+        font_size: "30sp"
+        pos_hint: {"center_x":.75, "center_y":.5}
+        color: utils.get_color_from_hex("#D57572")
+
+    Label:
+        text: root.followup
+        font_size: "17sp"
+        size_hint: None, None
+        x: root.pos[0] + root.size[0] - self.size[0] - 20
+        y: val.pos[1] - 30
+        color: utils.get_color_from_hex("#D57572")
+
+<Container>:
+    orientation: "horizontal"
+    spacing: "20dp"
+    size_hint_y: None
+    height: "120dp"
+
+<customIcon>:
+    pos_hint: {'center_x':.5, 'center_y':.5}
+    padding_x: 10
+    theme_text_color: "Custom"
+    text_color: utils.get_color_from_hex("#FFFFFF")
+
+<settingContent>:
+    orientation: "vertical"
+    spacing: "20dp"
+    size_hint_y: None
+    height: "120dp"
+    BoxLayout:
+        spacing: "20dp"
+        size_hint_y: None
+        height: "80dp"
+        Label:
+            text: "Pomodoro(Mins)"
+            font_size: "20sp"
+            color: utils.get_color_from_hex("#575757")
+        Label:
+            text: "Break(Mins)"
+            font_size: "20sp"
+            color: utils.get_color_from_hex("#575757")
+        Label:
+            text: "Long Break(Mins)"
+            font_size: "20sp"
+            color: utils.get_color_from_hex("#575757")
+    BoxLayout:
+        spacing: "20dp"
+        size_hint_y: None
+        height: "50dp"
+        TextInput:
+            id: Study
+            text: root.studyTime
+            size_hint: 10/6, 1
+            pos_hint: {"center_x": 10/3*1, "center_y":1}
+            font_size: "30sp"
+            multiline: False
+            background_color: utils.get_color_from_hex("#E9E9ED")
+        TextInput:
+            id: Break
+            text: root.breakTime
+            size_hint: 10/6, 1
+            pos_hint: {"center_x": 10/3*2, "center_y":1}
+            font_size: "30sp"
+            multiline: False
+            background_color: utils.get_color_from_hex("#E9E9ED")
+        TextInput:
+            id: LongBreak
+            text: root.longbreakTime
+            size_hint: 10/6, 1
+            pos_hint: {"center_x": 10/3*3, "center_y":1}
+            font_size: "30sp"
+            multiline: False
+            background_color: utils.get_color_from_hex("#E9E9ED")
+            
+<settingBTN>:
+    size_hint: (None, None)
+    size: (120,55)
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(self.ColorTheme)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: 5, 5, 5, 5
+
+
+    # ripple_scale: 0
+    # theme_text_color: "Custom"
+    # md_bg_color: utils.get_color_from_hex("#DF645F")
+    # text_color: utils.get_color_from_hex("#FFFFFF")
+    # line_color: utils.get_color_from_hex("#FFFFFF")
+    # icon_color: utils.get_color_from_hex("#FFFFFF")
+
+<reportBTN>:
+    size_hint: (None, None)
+    size: (120,55)
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(self.ColorTheme)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: 5, 5, 5, 5
+    # md_bg_color: utils.get_color_from_hex("#DD6662")
+    # theme_text_color: "Custom"
+    # text_color: utils.get_color_from_hex("#FFFFFF")
+    # line_color: utils.get_color_from_hex("#FFFFFF")
+    # icon_color: utils.get_color_from_hex("#FFFFFF")
+
 <skipBTN>:
     opacity: 0 if self.hidden else 1
     size_hint: [.13,.1]
@@ -41,7 +178,7 @@ Screen:
     icon: 'skip-next'
     theme_text_color: "Custom"
     text_color: utils.get_color_from_hex("#F6D4D2")
-
+    
 <ClockTextWidget>:
     font_size: '100sp'
     size_hint: [.5, .5]
