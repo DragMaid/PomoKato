@@ -600,14 +600,14 @@ class MainApp(MDApp):
         self.threads.append(thread)
 
     def on_start(self):
-        now = str(datetime.today().strftime('%Y-%m-%d'))
+        now = str(datetime.today().strftime('%d-%m-%Y'))
         Pass = str(DATA.get("yesterday")["value"])
         days = int(DATA.get("days")["value"])
         streak = int(DATA.get("streak")["value"])
         if now != Pass:
             DATA.put("days", value=days+1)
             try:
-                dis = int(now[0:1]) - int(Pass[0:1])
+                dis = int(now[0:2]) - int(Pass[0:2])
                 if dis == 1:
                     DATA.put("streak", value=streak+1)
                 else:
