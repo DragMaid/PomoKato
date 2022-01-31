@@ -2,6 +2,9 @@ import os
 import time
 import json
 import multiprocessing
+from subprocess import Popen
+from kivy.config import Config
+Config.set('kivy', 'exit_on_escape', '0')
 from kivy.app import App
 from kivymd.app import MDApp
 from kivy.lang import Builder
@@ -22,10 +25,12 @@ from kivymd.uix.dialog import MDDialog
 from kivymd.uix.list import ILeftBody
 from kivy.storage.jsonstore import JsonStore
 from datetime import datetime
+from random import randint
 
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 KIVY_PATH = os.path.join(DIRECTORY, "appui.kv")
 SOUND_PATH = os.path.join(DIRECTORY, "assets/sounds")
+VIDEO_PATH = os.path.join(DIRECTORY, "assets/videos")
 DATA_PATH = os.path.join(DIRECTORY, "data.json")
 CONGIG_PATH = "/home/kato/.config/safeeyes/safeeyes.json"
 QUOTE = [{"name": "Go do 8 pushups!"}]
@@ -38,6 +43,7 @@ BACKGROUND_BREAK_COLOR = "#468E91"
 BACKGROUND_STUDY_COLOR = "#DB524D"
 
 class Background(FloatLayout):
+    pos_y = NumericProperty()
     ColorTheme = StringProperty(BACKGROUND_STUDY_COLOR)
     isStudy = True
 
@@ -49,10 +55,12 @@ class Background(FloatLayout):
         if self.isStudy:
             self.children[0].changeTheme(isStudy=False)
             self.children[1].changeTheme(isStudy=False)
+            self.children[2].changeTheme(isStudy=False)
             self.isStudy = False
         else:
             self.children[0].changeTheme(isStudy=True)
             self.children[1].changeTheme(isStudy=True)
+            self.children[2].changeTheme(isStudy=True)
             self.isStudy = True
 
     def restartClock(self, custom=False, *args):
@@ -91,7 +99,14 @@ class Container(BoxLayout):
             self.bl.add_widget(x)
 
     def convert(self):
-        return str(self.totalTime / 60)[0]
+        hours = ""
+        mins_in_text = str(self.totalTime / 60)
+        for x in range(len(mins_in_text)):
+            if mins_in_text[x] == ".":
+                break
+            else:
+                hours += mins_in_text[x]
+        return hours
 
     def updateData(self):
         self.days =  str(DATA.get("days")["value"])
@@ -264,6 +279,46 @@ class reportBTN(ButtonBehavior, HoverBehavior, FloatLayout):
             self.pos[1] += self.buttonPad
         Window.unbind(on_touch_up=self.checkOutpos)
 
+class motivationBTN(ButtonBehavior, HoverBehavior, FloatLayout):
+    buttonPad = 5
+    ColorTheme = StringProperty(STUDY_THEME)
+    def __init__ (self, **kwargs):
+        super(). __init__ ()
+        self.add_widget(customIcon(icon="palette"))
+        self.add_widget(Label(text="Motive", font_size="17sp", pos_hint={"center_x": .6, "center_y":.5}))
+
+    def on_enter(self):
+        Window.set_system_cursor("hand")
+
+    def on_leave(self):
+        Window.set_system_cursor("arrow")
+
+    def changeTheme(self, isStudy=True):
+        if isStudy:
+            self.ColorTheme = STUDY_THEME
+        else:
+            self.ColorTheme = BREAK_THEME
+
+    def on_press(self):
+        self.pos[1] -= self.buttonPad
+        Window.bind(on_touch_up=self.checkOutpos)
+
+    def play_video(self):
+        # Get a random video
+        VIDEOS = os.listdir(VIDEO_PATH)
+        SELECTED_VIDEO = VIDEOS[randint(0, len(VIDEOS)-1)]
+        Popen("ffplay -autoexit " + os.path.join(VIDEO_PATH, SELECTED_VIDEO), shell=True)
+
+    def on_release(self):
+        self.pos[1] += self.buttonPad
+        self.play_video()
+
+    def checkOutpos(self, *args):
+        pos_x, pos_y =(Window.mouse_pos)
+        if not (pos_x >= self.pos[0] and pos_x <= self.pos[0] + self.size[0] and pos_y >= self.pos[1] and pos_y <= self.pos[1] + self.size[1]):
+            self.pos[1] += self.buttonPad
+        Window.unbind(on_touch_up=self.checkOutpos)
+
 class skipBTN(ButtonBehavior, HoverBehavior ,MDIcon):
     hidden = BooleanProperty(True)
 
@@ -385,7 +440,7 @@ class ClockTextWidget(Label):
 
     cycles = 0
     isSTUDY = True
-    alarm = SoundLoader.load(os.path.join(SOUND_PATH, "alarm2.mp3"))
+    alarm = SoundLoader.load(os.path.join(SOUND_PATH, "alarm.wav"))
 
     def __init__(self, **kwargs):
         super(). __init__()
@@ -473,41 +528,41 @@ class ClockTextWidget(Label):
 
     def playAlarm(self):
         self.alarm.unload()
-        self.alarm = SoundLoader.load(os.path.join(SOUND_PATH, "alarm2.mp3"))
+        self.alarm = SoundLoader.load(os.path.join(SOUND_PATH, "alarm.wav"))
         self.alarm.seek(0)
         self.alarm.play()
 
     def startBreak(self):
         self.playAlarm()
-        with open(CONGIG_PATH, 'r+') as file:
-            data = json.load(file)
-            data['long_break_duration'] = self.minutes * 60 + self.seconds
-            data['long_break_interval'] = 999999
-            data['long_breaks'] = QUOTE
-            file.seek(0)
-            json.dump(data, file, indent=4)
-            file.truncate()
-        app = App.get_running_app()
-        app.setupThread(self.showBreak)
-        self.breakTimeout()
+        # with open(CONGIG_PATH, 'r+') as file:
+            # data = json.load(file)
+            # data['long_break_duration'] = self.minutes * 60 + self.seconds
+            # data['long_break_interval'] = 999999
+            # data['long_breaks'] = QUOTE
+            # file.seek(0)
+            # json.dump(data, file, indent=4)
+            # file.truncate()
+        #app = App.get_running_app()
+        #app.setupThread(self.showBreak)
+        #self.breakTimeout()
 
     def breakTimeout(self):
         Clock.schedule_once(self.killDaemon, (self.minutes * 60 + self.seconds)+10)
 
     def killDaemon(self, *args):
-        os.system("killall safeeyes")
+        #os.system("killall safeeyes")
+        pass
 
     def showBreak(self):
-        self.killDaemon()
-        os.system("safeeyes -t")
-
+        #self.killDaemon()
+        #os.system("safeeyes -t")
+        pass
 
 class CustomLabel(Label):
     Text = StringProperty("[b]START[/b]")
 
     def __init__(self, **kwargs):
         super(). __init__()
-        # self.pos = self.parent.pos
 
     def changeText(self, *args):
         if self.Text == "[b]START[/b]":
@@ -594,10 +649,10 @@ class startBTN(ButtonBehavior, HoverBehavior, FloatLayout):
 class MainApp(MDApp):
     threads = []
 
-    def setupThread(self, func):
-        thread = multiprocessing.Process(target=func)
-        thread.start()
-        self.threads.append(thread)
+    # def setupThread(self, func):
+        # thread = multiprocessing.Process(target=func)
+        # thread.start()
+        # self.threads.append(thread)
 
     def on_start(self):
         now = str(datetime.today().strftime('%d-%m-%Y'))
@@ -619,9 +674,10 @@ class MainApp(MDApp):
     def on_stop(self):
         for i in self.threads:
             i.terminate()
-        os.system("killall safeeyes")
+        #os.system("killall safeeyes")
 
     def build(self):
+        self.title = "Pomokato"
         return Builder.load_file(KIVY_PATH)
 
 

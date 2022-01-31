@@ -15,21 +15,29 @@ Screen:
         Label:
             id: ses
             font_size: '25sp'
+            size_hint: [.05, .05 ]
             text: mainWidget.Text
-            pos_hint: {"center_x": .5, "center_y": .4}
+            pos_hint: {"center_x": .5}
+            y: mainWidget.pos[1] - self.size[1] - 20
+
         Label:
             font_size: '20sp'
             text: mainWidget.Quote
+            size_hint: [.05, .05 ]
             pos_hint: {"center_x": .5}
             y: ses.y - 30
+
         Logo:
             pos: mainWidget.pos[0] - 40, mainWidget.pos[1] + mainWidget.size[1] + 50
         settingBTN:
             pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40, mainWidget.pos[1] + mainWidget.size[1] + 50
         reportBTN:
-            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - self.size[0] - 15, mainWidget.pos[1] + mainWidget.size[1] + 50
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - 1*(self.size[0] + 15), mainWidget.pos[1] + mainWidget.size[1] + 50
+        motivationBTN:
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - 2*(self.size[0] + 15), mainWidget.pos[1] + mainWidget.size[1] + 50
 
 <ClockWidget>:
+    id: mainWidget
     size_hint: None, None
     size: 570, 400
     pos_hint: {'center_x': .5, 'center_y': .65}
@@ -172,6 +180,17 @@ Screen:
             radius: 5, 5, 5, 5
 
 <reportBTN>:
+    size_hint: (None, None)
+    size: (120,55)
+    canvas.before:
+        Color:
+            rgba: utils.get_color_from_hex(self.ColorTheme)
+        RoundedRectangle:
+            pos: self.pos
+            size: self.size
+            radius: 5, 5, 5, 5
+
+<motivationBTN>:
     size_hint: (None, None)
     size: (120,55)
     canvas.before:
