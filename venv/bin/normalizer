@@ -1,4 +1,4 @@
-#!/home/kato/Code-Container/pomodoro-timer/venv/bin/python
+#!/home/jakekato/Code/Pomokato/venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys

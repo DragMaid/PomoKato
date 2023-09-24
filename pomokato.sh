@@ -1,3 +1,3 @@
 #!/bin/sh
-source /home/kato/Code-Container/pomodoro-timer/venv/bin/activate
-python /home/kato/Code-Container/pomodoro-timer/main.py
+source ~/Code/Pomokato/venv/bin/activate
+python ~/Code/Pomokato/main.py

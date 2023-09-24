@@ -1,4 +1,4 @@
-#!/home/kato/Code-Container/pomodoro-timer/venv/bin/python
+#!/home/jakekato/Code/Pomokato/venv/bin/python
 
 import sys
 import argparse
@@ -64,6 +64,8 @@ class GardenTool(object):
                 help='Use the kivy garden directory (kivy/garden)')
         p.add_argument('--upgrade', action='store_true',
                 help='Force the installation')
+        p.add_argument('--no-download-progress', action='store_false', dest='animate',
+                help='Disable download progress indicator')
         p.add_argument('package', nargs=1,
                 help='Name of the package to install')
         p.set_defaults(func=self.cmd_install)
@@ -79,6 +81,7 @@ class GardenTool(object):
         p.set_defaults(func=self.cmd_uninstall)
 
         self.options = options = parser.parse_args(argv)
+        options.package = [p.lower() for p in getattr(options, 'package', ())]
 
         if hasattr(options, 'func'):
             options.func()
@@ -87,7 +90,7 @@ class GardenTool(object):
         else:
             parser.print_help()
 
-        if self.options.kivy and garden_kivy_dir is None:
+        if getattr(self.options, 'kivy', False) and garden_kivy_dir is None:
             print('--kivy provided; cannot find kivy')
             sys.exit(0)
 
@@ -137,7 +140,7 @@ class GardenTool(object):
             print('Use --upgrade to upgrade.')
             sys.exit(0)
 
-        fd = self.download(src_package)
+        fd = self.download(src_package, opts.animate)
         tempdir = tempfile.mkdtemp(prefix='garden-')
         try:
             self.extract(fd, tempdir)
@@ -184,8 +187,8 @@ class GardenTool(object):
             return 'garden.' + package
         return package
 
-    def download(self, package):
-        url = 'http://github.com/kivy-garden/{}/archive/master.zip'.format(
+    def download(self, package, animate):
+        url = 'https://github.com/kivy-garden/{}/archive/master.zip'.format(
                 package)
 
         print('Downloading {} ...'.format(url))
@@ -203,8 +206,9 @@ class GardenTool(object):
             index += 1
             data += buf
             count += len(buf)
-            print('Progression', count, animation[index % len(animation)], '\r')
-            sys.stdout.flush()
+            if animate:
+                print('Progression', count, animation[index % len(animation)], '\r')
+                sys.stdout.flush()
         print('Download done ({} downloaded)'.format(count))
 
         return BytesIO(data)

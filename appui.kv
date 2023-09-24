@@ -1,6 +1,7 @@
 #:import utils kivy.utils
 
 Screen:
+    #:set pad_num 30
     Background:
         canvas.before:
             Color:
@@ -28,19 +29,19 @@ Screen:
             y: ses.y - 30
 
         Logo:
-            pos: mainWidget.pos[0] - 40, mainWidget.pos[1] + mainWidget.size[1] + 50
+            pos: mainWidget.pos[0] - 85, mainWidget.pos[1] + mainWidget.size[1] + pad_num
         settingBTN:
-            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40, mainWidget.pos[1] + mainWidget.size[1] + 50
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40, mainWidget.pos[1] + mainWidget.size[1] + pad_num
         reportBTN:
-            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - 1*(self.size[0] + 15), mainWidget.pos[1] + mainWidget.size[1] + 50
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - 1*(self.size[0] + 15), mainWidget.pos[1] + mainWidget.size[1] + pad_num
         motivationBTN:
-            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - 2*(self.size[0] + 15), mainWidget.pos[1] + mainWidget.size[1] + 50
+            pos: mainWidget.pos[0] + mainWidget.size[0] - self.size[0] + 40 - 2*(self.size[0] + 15), mainWidget.pos[1] + mainWidget.size[1] + pad_num
 
 <ClockWidget>:
     id: mainWidget
     size_hint: None, None
     size: 570, 400
-    pos_hint: {'center_x': .5, 'center_y': .65}
+    pos_hint: {'center_x': .5, 'center_y': .6}
 
     canvas.before:
         Color:
@@ -48,15 +49,6 @@ Screen:
         Rectangle:
             pos: self.pos
             size: self.size
-<Logo>:
-    size_hint: (None, None)
-    size: (240,55)
-    Label:
-        text: "[b]Pomokato[/b]"
-        markup: True
-        font_size: "23sp"
-        size_hint: None, None 
-        pos_hint:  {"x": .2, "center_y":.5}
 
 <CustomDialog>:
     md_bg_color: utils.get_color_from_hex("#3D3D3D")

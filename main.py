@@ -10,6 +10,7 @@ from kivymd.app import MDApp
 from kivy.lang import Builder
 from kivy.uix.floatlayout import FloatLayout
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.anchorlayout import AnchorLayout
 from kivy.uix.button import ButtonBehavior
 from kivymd.uix.behaviors import HoverBehavior
 from kivy.properties import ObjectProperty, NumericProperty, StringProperty, BooleanProperty
@@ -81,7 +82,7 @@ class Background(FloatLayout):
 class CustomDialog(MDDialog):
     pass
 
-class customIcon(ILeftBody, MDIcon):
+class customIcon(MDIcon):
     pass
 
 class Container(BoxLayout):
@@ -135,22 +136,32 @@ class settingContent(BoxLayout):
     breakTime = str(DATA.get("break")["time"])
     longbreakTime = str(DATA.get("long_break")["time"])
 
-class Logo(FloatLayout):
+class Logo(BoxLayout):
     def __init__ (self, **kwargs):
-        super(). __init__ ()
-        self.logo = customIcon(icon="check-circle")
-        self.add_widget(self.logo)
+        super(). __init__ (size_hint=[None, None], size=(240, 60))
+        self.icon_container = AnchorLayout(size_hint = [.3, 1], padding=[0, 0], anchor_x='right', anchor_y='center')
+        self.add_widget(self.icon_container)
+        self.icon_container.add_widget(customIcon(icon="check-circle"))
 
+        self.label_container = AnchorLayout(size_hint = [.7, 1], anchor_x="left", anchor_y="center")
+        self.add_widget(self.label_container)
+        self.label_container.add_widget(Label(text="[b]Pomokato[/b]", markup=True, font_size="25sp", size_hint=[.8,1]))
 
-class settingBTN(ButtonBehavior, HoverBehavior, FloatLayout):
+class settingBTN(ButtonBehavior, HoverBehavior, BoxLayout):
     buttonPad = 5
     newTime = [DATA.get("study")["time"], DATA.get("break")["time"], DATA.get("long_break")["time"]]
     ColorTheme = StringProperty(STUDY_THEME)
 
     def __init__ (self, **kwargs):
         super(). __init__ ()
-        self.add_widget(customIcon(icon="cog"))
-        self.add_widget(Label(text="Setting", font_size="17sp", pos_hint={"center_x": .6, "center_y":.5}))
+        self.icon_container = AnchorLayout(size_hint = [.4, 1], padding=[5, 0], anchor_x='center', anchor_y='center')
+        self.add_widget(self.icon_container)
+        self.icon_container.add_widget(customIcon(icon="cog"))
+
+        self.label_container = AnchorLayout(size_hint = [.6, 1], anchor_x="left", anchor_y="center")
+        self.add_widget(self.label_container)
+        self.label_container.add_widget(Label(text="Setting", font_size="17sp", size_hint=[.8,1]))
+
         self.content = settingContent()
         self.dialog = MDDialog(
             type="custom",
@@ -234,13 +245,19 @@ class settingBTN(ButtonBehavior, HoverBehavior, FloatLayout):
             self.writeChangedTime()
             self.dialog.dismiss()
 
-class reportBTN(ButtonBehavior, HoverBehavior, FloatLayout):
+class reportBTN(ButtonBehavior, HoverBehavior, BoxLayout):
     buttonPad = 5
     ColorTheme = StringProperty(STUDY_THEME)
     def __init__ (self, **kwargs):
         super(). __init__ ()
-        self.add_widget(customIcon(icon="chart-bar"))
-        self.add_widget(Label(text="Report", font_size="17sp", pos_hint={"center_x": .6, "center_y":.5}))
+        self.icon_container = AnchorLayout(size_hint = [.4, 1], padding=[5, 0], anchor_x='center', anchor_y='center')
+        self.add_widget(self.icon_container)
+        self.icon_container.add_widget(customIcon(icon="chart-bar"))
+
+        self.label_container = AnchorLayout(size_hint = [.6, 1], anchor_x="left", anchor_y="center")
+        self.add_widget(self.label_container)
+        self.label_container.add_widget(Label(text="Report", font_size="17sp", size_hint=[.8,1]))
+
         self.content = Container()
         self.dialog = MDDialog(
             type="custom",
@@ -279,13 +296,18 @@ class reportBTN(ButtonBehavior, HoverBehavior, FloatLayout):
             self.pos[1] += self.buttonPad
         Window.unbind(on_touch_up=self.checkOutpos)
 
-class motivationBTN(ButtonBehavior, HoverBehavior, FloatLayout):
+class motivationBTN(ButtonBehavior, HoverBehavior, BoxLayout):
     buttonPad = 5
     ColorTheme = StringProperty(STUDY_THEME)
     def __init__ (self, **kwargs):
         super(). __init__ ()
-        self.add_widget(customIcon(icon="palette"))
-        self.add_widget(Label(text="Motive", font_size="17sp", pos_hint={"center_x": .6, "center_y":.5}))
+        self.icon_container = AnchorLayout(size_hint = [.4, 1], padding=[5, 0], anchor_x='center', anchor_y='center')
+        self.add_widget(self.icon_container)
+        self.icon_container.add_widget(customIcon(icon="palette"))
+
+        self.label_container = AnchorLayout(size_hint = [.6, 1], anchor_x="left", anchor_y="center")
+        self.add_widget(self.label_container)
+        self.label_container.add_widget(Label(text="Motive", font_size="17sp", size_hint=[.8,1]))
 
     def on_enter(self):
         Window.set_system_cursor("hand")
